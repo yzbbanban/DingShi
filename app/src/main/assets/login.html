@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>login</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="layui/css/layui.css" media="all">
+    <link rel="stylesheet" href="css/hanett.css" media="all">
+    <script src="layui/layui.js" charset="utf-8"></script>
+</head>
+<body>
+
+<div class="layui-row">
+    <div class="layui-col-xs12">
+        <h1 class="layui-title"><img src="images/login_title.jpg" alt="顶实物流登录"></h1>
+    </div>
+</div>
+<div class="layui-mains">
+    <div class="layui-form-item">
+        <label class="layui-form-label">账&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;号</label>
+        <div class="layui-input-block">
+            <input id='login' type="text" placeholder="请输入账号" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">密&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;码</label>
+        <div class="layui-input-block">
+            <input id='password' type="password" placeholder="请输入密码" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item textc">
+        <button class="layui-btn layui-btn-big1" id="but" style="margin-bottom: 10px">登录</button>
+        <a href="login.html" class="layui-btn layui-btn-big1 layui-btn-big2">刷新</a>
+    </div>
+    <div class="layui-form-item oauth-area">
+
+    </div>
+</div>
+<script src="js/jquery-1.10.2.js"></script>
+<script src="js/layer/layer.min.js"></script>
+<script src="js/ip.js"></script>
+<script>
+
+
+  	function sendInfoToJava(){
+        //调用android程序中的方法，并传递参数
+        window.AndroidWebView.showInfoFromJs("1");
+  	}
+
+	$(document).ready(function(){
+		$("#but").click(function(){
+			//alert("ban")
+			var login = $("#login").val();
+			var pass = $("#password").val();
+			if(login&&pass){
+				$.ajax({
+					type : "post",
+					url:ip+"login.php?action=login",
+					data:{"login":login,"password":pass},
+					success : function(json){
+						// alert(ip);
+						if(json){
+							layer.msg('登录成功',{time:1000});
+							//alert(json)
+                            sendInfoToJava();
+							window.location.href="main.html?uid="+json;
+						}else{
+							alert("用户名和密码不对");
+						}
+					}
+				});
+			}
+		})
+	})
+
+
+</script>
+</body>
+</html>

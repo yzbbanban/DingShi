@@ -1,0 +1,175 @@
+*{
+	margin:0;
+	padding:0;
+	}
+	
+a{
+	text-decoration:none;
+	}
+	
+ul li{
+	list-style:none;
+	}
+	
+.mt20{
+	margin-top:20px;	
+}
+
+.mt40{
+	margin-top:40px;	
+}
+
+.fl{
+	float:left;
+	}
+	
+.fr{
+	float:right;
+	}
+	
+.clear{
+	clear:both;
+	}
+.center{
+	text-align:center;
+	font-family:'微软雅黑';
+}
+.ship_hf{
+	margin-top: 20px;
+	float: left;
+}
+.tm_ck {
+    height: 80px;
+}
+.tm_ck a{
+	height: 47px !important;
+	float: left !important;
+}
+.tm_ck input{
+	margin-left: 10px;
+	width: 94% !important;
+	background: #ffffff !important;
+	height: 47px !important;
+	margin-top: 20px;
+	font-size: 22px !important;
+}
+#login{
+	height: 50px;
+	font-size: 22px;
+}
+.code_list{
+	height: 180px;
+   overflow: scroll;
+    width: 100%;
+}
+.first_ul{
+	background: #007aff !important;
+	color: #ffffff;
+}
+.first_ul label{
+	width: 100%;
+	background: #007aff !important;	
+	padding-top:10px;
+	display: block;
+	height: 40px;
+	font-size: 25px;
+	font-weight: bold;
+	float: left;
+	text-align: center;
+}
+
+
+.code_list li{
+	width: 100%;
+	height: 68px;
+	background: #ffffff;
+	border-bottom:1px solid #939393;
+}
+.code_list li label:first-child{
+	/*border-right:1px solid #000000 ;*/
+}
+.code_list li label{
+	width: 100%;
+	display: block;
+	text-align: left;
+	font-size: 16px;
+	padding-top: 10px;
+	overflow: hidden !important;
+	/*word-break:keep-all;*/
+	white-space:nowrap;	
+	text-overflow:ellipsis;
+	
+}
+.first_text label{
+	font-size: 22px;
+	margin-left: 10px;
+	font-weight: bold;
+}
+.first_text span{
+	color: #ff0000;
+}
+.but_code{
+	     color: #ffffff; 
+	background: #007aff !important;	
+    width: 49%;
+    font-size: 25px;
+    font-weight: bold;
+    margin-top: 10px;
+}
+.search_hf{
+	    margin-top: 20px;
+    width: 28% !important;
+    font-size: 25px !important;
+    font-weight: bold !important;
+}
+.tm_ck input{
+	padding-left: 12px !important;
+}
+.search_out{
+	background: #ffffff !important;
+}
+.search_xq{
+	    margin-top: 20px;
+	    width: 100% !important;
+	    color: #ffffff !important;
+	    
+    font-size: 30px !important;
+    font-weight: bold !important;
+}
+
+.mess_out div{
+	 text-align: center;
+    font-size: 25px !important;
+    
+}
+.mess_out{
+	margin-top: 0px !important;
+}
+.mass_text{
+	    background: #007aff;
+    text-align: center;
+    color: #ffffff;
+    font-weight: bold;
+    font-size: 30px;
+    padding-top: 13px;
+    height: 45px;
+}
+.mess_out{
+	    overflow: auto !important;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    height: 180px;
+}
+.code_list .name{
+	color: #000000;
+}
+.but{
+	    position: relative;
+    top: 0px;
+}
+.but button{
+	    position: absolute;
+}
+.but .code_fh{
+	left: 50%;
+}

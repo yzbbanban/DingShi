@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>index</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="layui/css/layui.css" media="all">
+    <link rel="stylesheet" href="css/hanett.css" media="all">
+</head>
+
+<body>
+
+<div class="index_top">
+    <div class="layui-row" style="background:url(images/index_top1.jpg) no-repeat center top;background-size: 100%;">
+        <div class="layui-col-xs12">
+            <h1 class="layui-title3">
+                <a href="javascript:;" class="code_fh"><i class="layui-icon">&#xe603;</i></a>
+                <input type="text" name="bl" id="selects" style="width:60%" placeholder="请输入物流箱编号"
+                       class="layui-input jhr">
+                <button type="button" class="layui-btn" id="btn_search" style="width:20%">添加
+                </button>
+            </h1>
+            <p class="mt20"><label>订单编号</label></p>
+            <p><span id="order" class="fs30">A000012</span></p>
+            <p class="mb20"><label>出货人：</label><span id="chr">张三</span></p>
+        </div>
+    </div>
+    <div class="layui-row" style="background:url(images/index_top2.jpg) no-repeat center top;background-size: 100%;">
+        <div class="layui-col-xs12">
+            <p class="textl"><label>地址：</label><span id="address">月台1</span></p>
+        </div>
+    </div>
+</div>
+
+<div class="layui-row-tit">
+    <div class="layui-mains">
+        <label>物流箱编号(<span id="num">0</span>)</label>
+    </div>
+</div>
+
+<div class="layui-mains">
+    <div class="layui-form-item textc">
+        <button class="layui-btn layui-btn-big1 add">提交</button>
+    </div>
+    <ul class="code_list" id="ull">
+        <!-- 	<li>1111111111</li>
+<li>1111111111</li>
+<li>1111111111</li> -->
+    </ul>
+    <span class="layui-word-aux">*提交之前，请手动吧锁关上</span>
+</div>
+
+<script src="js/jquery-1.10.2.js"></script>
+<script src="js/ip.js"></script>
+<script src="js/layer/layer.min.js"></script>
+<script type="text/javascript">
+			function showInfoFromJava(msg) {
+			    //alert("111："+msg);
+				if(msg == "[]") {
+					$("#selects").val("");
+				} else {
+					//alert("22来自客户端的信息："+msg);
+					var aoJs = JSON.parse(msg); //转换为object对象
+					var coded=aoJs[0].bucket_code;
+					if(coded.length>=24){
+					    $("#selects").val(aoJs[0].bucket_code);
+					}
+				}
+			}
+
+
+			$(".code_list").each(function() {
+				$(this).click(function() {
+					//直接删除
+					if(confirm("确认删除吗")) {
+						$.ajax({
+							type: "post",
+							url: ip + "index.php?action=del",
+							data: {
+								"order": order,
+								"cage": cage,
+								"id": uid,
+								"html":$(this).html()
+							},
+							success: function(json) {
+								var obj = eval("(" + json + ")");
+								if(obj['status']) {
+									layer.msg("删除成功", {
+										time: 1000
+									});
+									//删除当前元素
+									$(this).remove();
+								} else {
+									layer.msg(obj['str'], {
+										time: 1000
+									});
+								}
+							}
+						})
+
+					}
+				})
+			})
+
+			function sendInfoFromJava(m) {
+				if(m == '1') {
+					//alert("来自客户端的信息：" + m);
+					var val = $("#selects").val();
+					if(val != "") {
+						//alert("来自客户端的信息22：" + val);
+						var str = fun(val);
+						if(str) {
+							$('.jhr').val('');
+							//layer.msg('编号已存在',{time:1000});
+							alert("编号已存在");
+						}
+						$.ajax({
+							type: "post",
+							url: ip + "index.php?action=selcode",
+							data: {
+								"code": val,
+								"id": id,
+								"uid": uid
+							},
+							success: function(json) {
+								//alert("自动上传： " + json)
+								var obj = eval("(" + json + ")");
+								if(obj['status']) {
+									var num = $("#num").html();
+									$("#num").html(parseInt(num) + 1);
+									var str = "<li>" + val + "</li>";
+									$(".code_list").append(str);
+									$('.jhr').val('');
+								} else {
+									layer.msg(obj['str'], {
+										time: 1000
+									});
+								}
+							}
+						});
+					}
+				}
+			}
+
+
+
+
+			function fun(strs) {
+				var row = '';
+				$(".code_list").each(function() {
+					var str = $(this).html();
+					if(str == strs) {
+						row = 1;
+					}
+				})
+				return row;
+			}
+
+			var id = '';
+			$(document).ready(function() {
+				$.ajax({
+					type: "post",
+					url: ip + "index.php?action=indexsel",
+					data: {
+						"order": order,
+						"cage": cage,
+						"id": uid
+					},
+					success: function(json) {
+						var obj = eval("(" + json + ")");
+						id = obj['batch_id'];
+						$("#order").html(obj['order_code']);
+						$("#chr").html(obj['drver_name']);
+						$("#address").html(obj['address']);
+					}
+				});
+
+				$('#btn_search').click(function() {
+					var val = $("#selects").val();
+					if(val) {
+						var str = fun(val);
+						if(str) {
+							$('.jhr').val('');
+							layer.msg('编号已存在', {
+								time: 1000
+							});
+							// alert("编号已存在");
+						}
+						$.ajax({
+							type: "post",
+							url: ip + "index.php?action=selcode",
+							data: {
+								"code": val,
+								"id": id,
+								"uid": uid
+							},
+							success: function(json) {
+								var obj = eval("(" + json + ")");
+								if(obj['status']) {
+									var num = $("#num").html();
+									$("#num").html(parseInt(num) + 1);
+									var str = "<li>" + val + "</li>";
+									$(".code_list").append(str);
+									$('.jhr').val('');
+								} else {
+									layer.msg(obj['str'], {
+										time: 1000
+									});
+								}
+							}
+						});
+					}
+				});
+				$('.jhr').keyup(function(e) {
+					if(e.keyCode == 13) {
+						var val = $(this).val();
+						if(val) {
+							var str = fun(val);
+							if(str) {
+								$('.jhr').val('');
+								layer.msg('编号已存在', {
+									time: 1000
+								});
+								// alert("编号已存在");
+							}
+							$.ajax({
+								type: "post",
+								url: ip + "index.php?action=selcode",
+								data: {
+									"code": val,
+									"id": id,
+									"uid": uid
+								},
+								success: function(json) {
+									var obj = eval("(" + json + ")");
+									if(obj['status']) {
+										var num = $("#num").html();
+										$("#num").html(parseInt(num) + 1);
+										var str = "<li>" + val + "</li>";
+										$(".code_list").append(str);
+										$('.jhr').val('');
+									} else {
+										layer.msg(obj['str'], {
+											time: 1000
+										});
+									}
+								}
+							});
+						}
+					}
+				})
+				//点击提交
+				$(".add").click(function() {
+				    //alert("测试：add");
+					$(".add").attr("disabled", true);
+					$.ajax({
+						type: "post",
+						url: ip + "index.php?action=add",
+						data: {
+							"id": id,
+							"uid": uid
+						},
+						success: function(json) {
+							var obj = eval("(" + json + ")");
+							//alert("测试：s"+json);
+							if(obj['status']) {
+								//layer.msg("提交成功", {
+								//	time: 1000
+								//});
+								alert("提交成功");
+								$(".add").attr("disabled", false);
+								window.location.href = "main.html?uid=" + uid;
+							} else {
+								layer.msg(obj['str'], {
+									time: 1000
+								});
+								$(".add").attr("disabled", false);
+							}
+						}
+					})
+				})
+
+				//返回
+				$(".code_fh").click(function() {
+					// alert(id);
+					$.ajax({
+						type: "post",
+						url: ip + "index.php?action=back",
+						data: {
+							"id": id,
+							"uid": uid
+						},
+						success: function(json) {
+							if(json) {
+								window.location.href = "main.html?uid=" + uid;
+							}
+						}
+					})
+				})
+			})
+		</script>
+
+</body>
+
+</html>

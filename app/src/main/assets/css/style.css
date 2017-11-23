@@ -1,0 +1,100 @@
+.ui-page-login,
+body {
+	width: 100%;
+	height: 100%;
+	margin: 0px;
+	padding: 0px;
+}
+.mui-title{
+	font-size: 30px;
+	font-weight: bold;
+}
+.mui-content{height: 100%;}
+ul {
+	font-size: 14px;
+	color: #8f8f94;
+}
+
+.mui-bar{
+	height: 50px !important;
+}
+.mui-bar h1{
+	font-size: 35px;
+}
+
+.min_a .mui-content-padded .mui-btn {
+			     padding: 5px; 
+    width: 100%;
+    margin-top: 22px;
+    font-size: 50px;
+    height: 80px;
+			}
+			
+/*出货列表的样式*/
+.chlb{
+	font-weight: none;
+	margin-top: 5px;
+}
+.min_a .chdd_list{
+	width:100%;
+	min-height:50px;
+	background: #ffffff;
+	margin-top: 10px;
+	border: 1px solid #C0C0C0;
+	border-style: outset;
+}
+.min_a .chdd_list div
+{
+	width: 100%;
+    height: 45px;
+    /*border-style: ridge;*/
+   border: 1px solid #cccccc;
+    border-top: none;
+    /*border-style:solid;*/
+}
+.mui-content-padded button,.mui-content-padded a{
+	font-size: 30px;
+}
+
+.min_a .chdd_list div > label
+{
+	width: 37%;
+	height: 30px;
+	display: block;
+	float: left;
+	font-size: 20px;
+	border: 1px;
+	font-weight: bold;
+}
+.min_a .chdd_list div > span
+{
+	float: left;
+	display: block;
+	width: 62%;
+	font-size: 20px;
+	height: 30px;
+	padding-top: 10px;
+}
+.ch_list{
+	height: 50px;
+}
+.min_a .chdd_list div > a
+{
+	    width: 100%;
+    text-align: cneter;
+    text-align: center;
+    display: block;
+    height: 30px;
+    padding-top: 8px;
+}
+
+.min_a .ship_hf{
+	     width: 28% !important; 
+    font-size: 25px !important;
+    font-weight: bold !important;
+    height: 56px;
+    color:#ffffff !important;
+}
+.min_a a {
+	color: #000000;
+}
