@@ -35,9 +35,10 @@ import lt.riti.com.dingshi.entity.PublicData;
  */
 
 public class NewRfidFragment extends BaseFragment implements IAsynchronousMessage {
-    private static final String TAG = "StockInFragment";
+    private static final String TAG = "NewRfidFragment";
     private WebView mWebView;
     private String loginStatus;
+
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -115,6 +116,7 @@ public class NewRfidFragment extends BaseFragment implements IAsynchronousMessag
      * @return
      */
     public boolean onKeyDown(int keyCode, KeyEvent event, int inputType) {
+        Log.i(TAG, "onKeyDown: ");
         if ("1".equals(loginStatus)) {
             if (keyCode == 12) { // 按下扳机 || keyCode == 4
 //            Toast.makeText(getActivity(), "onKeyDown--->: " + keyCode, Toast.LENGTH_SHORT).show();
@@ -157,7 +159,7 @@ public class NewRfidFragment extends BaseFragment implements IAsynchronousMessag
      * 显示列表
      */
     protected void showList() {
-        Toast.makeText(getActivity(), "showList: " + getData().size(), Toast.LENGTH_SHORT).show();
+//        Toast.makeText(getActivity(), "showList: " + getData().size(), Toast.LENGTH_SHORT).show();
         showView(getData());
     }
 
@@ -187,10 +189,20 @@ public class NewRfidFragment extends BaseFragment implements IAsynchronousMessag
         }
 
         //在js中调用window.AndroidWebView.showInfoFromJs(name)，便会触发此方法。
+        //判断是否登录
         @JavascriptInterface
         public void showInfoFromJs(String type) {
             loginStatus = type;
 //            Toast.makeText(mContext, type, Toast.LENGTH_SHORT).show();
+        }
+        //判断是否批量读取
+        @JavascriptInterface
+        public void changeRead(String type) {
+            Log.i(TAG, "type: "+type);
+//            loginStatus = type;
+            readType = Integer.parseInt(type);
+//            Toast.makeText(mContext, type, Toast.LENGTH_SHORT).show();
+//            Log.i(TAG, "type: "+type);
         }
     }
 

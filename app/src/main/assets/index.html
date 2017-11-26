@@ -20,8 +20,8 @@
                 <a href="javascript:;" class="code_fh"><i class="layui-icon">&#xe603;</i></a>
                 <input type="text" name="bl" id="selects" style="width:60%" placeholder="请输入物流箱编号"
                        class="layui-input jhr">
-                <button type="button" class="layui-btn" id="btn_search" style="width:20%">添加
-                </button>
+                <!--<button type="button" class="layui-btn" id="btn_search" style="width:20%">添加-->
+                <!--</button>-->
             </h1>
             <p class="mt20"><label>订单编号</label></p>
             <p><span id="order" class="fs30">A000012</span></p>
@@ -57,6 +57,12 @@
 <script src="js/ip.js"></script>
 <script src="js/layer/layer.min.js"></script>
 <script type="text/javascript">
+            //这个别动
+            function sendInfoToJavaWithType(){
+                //改为批量读取
+                window.AndroidWebView.changeRead("1");
+  	        }
+
 			function showInfoFromJava(msg) {
 			    //alert("111："+msg);
 				if(msg == "[]") {
@@ -134,6 +140,7 @@
 									var str = "<li>" + val + "</li>";
 									$(".code_list").append(str);
 									$('.jhr').val('');
+
 								} else {
 									layer.msg(obj['str'], {
 										time: 1000
@@ -175,9 +182,11 @@
 						$("#order").html(obj['order_code']);
 						$("#chr").html(obj['drver_name']);
 						$("#address").html(obj['address']);
+						//不能删 批次单次读取识别
+                        sendInfoToJavaWithType();
 					}
 				});
-
+                /**
 				$('#btn_search').click(function() {
 					var val = $("#selects").val();
 					if(val) {
@@ -214,6 +223,7 @@
 						});
 					}
 				});
+				*/
 				$('.jhr').keyup(function(e) {
 					if(e.keyCode == 13) {
 						var val = $(this).val();

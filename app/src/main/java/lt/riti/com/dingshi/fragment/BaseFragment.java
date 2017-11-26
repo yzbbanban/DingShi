@@ -41,6 +41,8 @@ import lt.riti.com.dingshi.entity.Bucket;
  */
 
 public class BaseFragment extends Fragment {
+    public static int readType=0;//1代表批量读取
+
     private static final String TAG = "BaseFragment";
     static Boolean _UHFSTATE = false; // 模块是否已经打开
     // static int _PingPong_ReadTime = 10000; // 默认是100:3
