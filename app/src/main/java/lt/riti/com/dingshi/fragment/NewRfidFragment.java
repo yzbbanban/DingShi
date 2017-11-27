@@ -4,6 +4,8 @@ package lt.riti.com.dingshi.fragment;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
@@ -21,6 +23,7 @@ import android.widget.Toast;
 
 import com.clouiotech.pda.rfid.EPCModel;
 import com.clouiotech.pda.rfid.IAsynchronousMessage;
+import com.clouiotech.util.Helper.Helper_ThreadPool;
 import com.google.gson.Gson;
 
 import java.util.List;
@@ -29,6 +32,7 @@ import lt.riti.com.dingshi.R;
 import lt.riti.com.dingshi.app.StockApplication;
 import lt.riti.com.dingshi.entity.Bucket;
 import lt.riti.com.dingshi.entity.PublicData;
+import lt.riti.com.dingshi.utils.ToastUtil;
 
 /**
  * Created by brander on 2017/9/22.
@@ -38,6 +42,7 @@ public class NewRfidFragment extends BaseFragment implements IAsynchronousMessag
     private static final String TAG = "NewRfidFragment";
     private WebView mWebView;
     private String loginStatus;
+    private int inputType;//rfid或二维码
 
 
     @Override
@@ -116,35 +121,25 @@ public class NewRfidFragment extends BaseFragment implements IAsynchronousMessag
      * @return
      */
     public boolean onKeyDown(int keyCode, KeyEvent event, int inputType) {
+        this.inputType = inputType;
         Log.i(TAG, "onKeyDown: ");
+        Log.i(TAG, "onKeyDown inputType: " + inputType);
         if ("1".equals(loginStatus)) {
             if (keyCode == 12) { // 按下扳机 || keyCode == 4
 //            Toast.makeText(getActivity(), "onKeyDown--->: " + keyCode, Toast.LENGTH_SHORT).show();
                 if (inputType == 1) {//扫码
-                    DeCode(this);
+                    if (readType == 0) {
+                        DeCode(this);
+                    } else {//批量
+                        PingPong_Read();
+                    }
 
-//                    showView(getRCodeData());
                 } else {//扫描
 //            Toast.makeText(getActivity(), "onKeyDown 33--->: ", Toast.LENGTH_SHORT).show();
-                    isSingle = false;
-//                    showList();
-                    if (!isKeyDown) {
-                        isKeyDown = true; //
-                        StockApplication.setIsInStock(1);
-                        Clear(null);
-                        CLReader.Read_EPC(_NowReadParam);
-                        if (PublicData._IsCommand6Cor6B.equals("6C")) {// 读6C标签
-                            CLReader.Read_EPC(_NowReadParam);
-                        } else {// 读6B标签
-                            CLReader.Get6B(_NowAntennaNo + "|1" + "|1" + "|"
-                                    + "1,000F");
-                        }
-                    } else {
-                        if (keyDownCount < 10000)
-                            keyDownCount++;
-                    }
-                    if (keyDownCount > 100) {
-                        isLongKeyDown = true;
+                    if (readType == 0) {//单次
+                        openRfid();
+                    } else {//批量
+                        PingPong_Read();
                     }
                 }
             }
@@ -153,6 +148,88 @@ public class NewRfidFragment extends BaseFragment implements IAsynchronousMessag
         }
         return true;
     }
+
+    private void openRfid() {
+        Log.i(TAG, "PingPong_Read: " + (x++));
+        isSingle = false;
+        if (readType == 1) {
+            showList();
+        }
+
+        if (!isKeyDown) {
+            isKeyDown = true; //
+            StockApplication.setIsInStock(1);
+            Clear(null);
+            CLReader.Read_EPC(_NowReadParam);
+            if (PublicData._IsCommand6Cor6B.equals("6C")) {// 读6C标签
+                CLReader.Read_EPC(_NowReadParam);
+            } else {// 读6B标签
+                CLReader.Get6B(_NowAntennaNo + "|1" + "|1" + "|"
+                        + "1,000F");
+            }
+        } else {
+            if (keyDownCount < 10000)
+                keyDownCount++;
+        }
+        if (keyDownCount > 100) {
+            isLongKeyDown = true;
+        }
+    }
+
+    int x = 0;
+
+    // 间歇性读
+    private void PingPong_Read() {
+
+        if (isStartPingPong)
+            return;
+        isStartPingPong = true;
+        Helper_ThreadPool.ThreadPool_StartSingle(new Runnable() {
+            @Override
+            public void run() {
+                while (isStartPingPong) {
+                    try {
+                        if (!isPowerLowShow) {
+                            if (usingBackBattery && !canUsingBackBattery()) {
+                                ToastUtil.showShortToast("电量低");
+                            }
+                            handler.sendEmptyMessage(0);
+                            Thread.sleep(1000); // 一秒钟刷新一次
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
+    }
+
+    // 停止间歇性读
+    private void Pingpong_Stop() {
+        isStartPingPong = false;
+        CLReader.Stop();
+        keyDownCount = 0;
+        isKeyDown = false;
+        isLongKeyDown = false;
+    }
+
+    private Handler handler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case 0:
+                    if (inputType == 1) {
+                        Log.i(TAG, "handleMessage: "+inputType);
+                        DeCode(NewRfidFragment.this);
+                        showView(getRCodeData());
+                    } else {
+                        openRfid();
+                    }
+                    break;
+            }
+
+        }
+    };
 
 
     /**
@@ -169,9 +246,10 @@ public class NewRfidFragment extends BaseFragment implements IAsynchronousMessag
      * @param buckets
      */
     public void showView(List<Bucket> buckets) {
-        bs.clear();
-        hmList.clear();
-//        Toast.makeText(getActivity(), "showView--: " + buckets, Toast.LENGTH_SHORT).show();
+//        bs.clear();
+//        hmList.clear();
+        Toast.makeText(getActivity(), "showView--: " + buckets, Toast.LENGTH_SHORT).show();
+        Log.i(TAG, "showView: " + buckets.toString());
         Gson gson = new Gson();
         String msg = gson.toJson(buckets);
         //调用js中的函数：showInfoFromJava(msg)
@@ -195,10 +273,11 @@ public class NewRfidFragment extends BaseFragment implements IAsynchronousMessag
             loginStatus = type;
 //            Toast.makeText(mContext, type, Toast.LENGTH_SHORT).show();
         }
+
         //判断是否批量读取
         @JavascriptInterface
         public void changeRead(String type) {
-            Log.i(TAG, "type: "+type);
+            Log.i(TAG, "type: " + type);
 //            loginStatus = type;
             readType = Integer.parseInt(type);
 //            Toast.makeText(mContext, type, Toast.LENGTH_SHORT).show();
@@ -223,7 +302,11 @@ public class NewRfidFragment extends BaseFragment implements IAsynchronousMessag
     @Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {
 //        Toast.makeText(getActivity(), "sssssss", Toast.LENGTH_SHORT).show();
-        mWebView.loadUrl("javascript:sendInfoFromJava('1')");
+
+//        mWebView.loadUrl("javascript:sendInfoFromJava('1')");
+        if (readType == 1) {
+            Pingpong_Stop();
+        }
         return super.onKeyUp(keyCode, event);
     }
 

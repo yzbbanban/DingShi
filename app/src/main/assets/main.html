@@ -78,6 +78,11 @@
     	}
 
   	}
+  	//这个别动
+    function sendInfoToJavaWithType(){
+         //改为批量读取
+         window.AndroidWebView.changeRead("0");
+  	}
 	$(document).ready(function(){
 		$.ajax({
 			async : false,
@@ -117,6 +122,7 @@
 									} 
 									$("#product_chr").append(str);
 									form.render('select','product_chr');
+									sendInfoToJavaWithType();
 								}
 							}) 
 						}

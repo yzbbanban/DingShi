@@ -35,13 +35,14 @@ import java.util.concurrent.Executors;
 
 import lt.riti.com.dingshi.app.StockApplication;
 import lt.riti.com.dingshi.entity.Bucket;
+import lt.riti.com.dingshi.utils.ToastUtil;
 
 /**
  * Created by brander on 2017/9/22.
  */
 
 public class BaseFragment extends Fragment {
-    public static int readType=0;//1代表批量读取
+    public static int readType = 0;//1代表批量读取
 
     private static final String TAG = "BaseFragment";
     static Boolean _UHFSTATE = false; // 模块是否已经打开
@@ -68,7 +69,7 @@ public class BaseFragment extends Fragment {
     protected int speed = 0; // 读取速度
     protected int _ReadType = 0; // 0 为读EPC，1 为读TID
     protected String _NowReadParam = _NowAntennaNo + "|1"; // 读标签参数
-    protected static HashMap<String, EPCModel> hmList = new HashMap<String, EPCModel>();
+    protected HashMap<String, EPCModel> hmList = new HashMap<String, EPCModel>();
     protected Object hmList_Lock = new Object();
     protected boolean flag = true; //
     protected Boolean IsFlushList = true; // 是否刷列表
@@ -247,6 +248,7 @@ public class BaseFragment extends Fragment {
             isKeyDown = false;
             isLongKeyDown = false;
         }
+        i=0;
         return true;
     }
 
@@ -258,9 +260,14 @@ public class BaseFragment extends Fragment {
     }
 
     String idString;
-    protected static HashMap<String, String> bs = new HashMap<>();
-
+    protected HashMap<String, String> bs = new HashMap<>();
+    int i=0;
     protected void DeCode(final NewRfidFragment fragment) {
+        ToastUtil.showShortToast("deCode: "+i);
+        if (i==0){
+            bs.clear();
+            i++;
+        }
         scaninit();
         if (busy) {
 //            ToastUtil.showShortToast(getString(R.string.str_busy));
@@ -277,7 +284,7 @@ public class BaseFragment extends Fragment {
                 try {
                     byte[] id = scanReader.decode();
                     if (id != null) {
-                        idString = new String(id, Charset.forName("gbk")) + "\n";
+                        idString = new String(id, Charset.forName("Utf8")) + "\n";
 //                        idString=new String(id);
                         idString = idString.trim();
                         toneGenerator.startTone(ToneGenerator.TONE_PROP_BEEP);
@@ -304,18 +311,18 @@ public class BaseFragment extends Fragment {
                         });
                     }
 
-                    getActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
+                    if (readType == 0) {//单次
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
 //                            fragment.initListener();
-                            fragment.showView(getRCodeData());
-                        }
-                    });
-
+                                fragment.showView(getRCodeData());
+                            }
+                        });
+                    }
                     try {
                         Thread.sleep(100);
                     } catch (InterruptedException e) {
-                        // TODO Auto-generated catch block
                         e.printStackTrace();
                     }
                     busy = false;
@@ -405,13 +412,19 @@ public class BaseFragment extends Fragment {
      * @param model
      */
     public void OutPutEPC(EPCModel model, final NewRfidFragment fragment) {
+        if (i==0){
+            hmList.clear();
+            i++;
+        }
         if (!isKeyDown) {
             return;
         }
         try {
             synchronized (hmList_Lock) {
-                if (hmList.size() > 0) {
-                    hmList.clear();
+                if (readType == 0) {
+                    if (hmList.size() > 0) {
+                        hmList.clear();
+                    }
                 }
                 //存在相同数据
                 if (hmList.containsKey(model._EPC + model._TID)) {
@@ -422,22 +435,29 @@ public class BaseFragment extends Fragment {
 //                    if (isSingle) {
 //                    Log.i(TAG, "OutPutEPC:--------------> ");
 //                    Log.i(TAG, "OutPutEPC size: " + hmList.size());
-                    if (hmList.size() >= 0 && hmList.size() < 1) {//只允许插入一个数
-                        Log.i(TAG, "j size: " + hmList.size());
-                        hmList.put(model._EPC + model._TID, model);
-                        isAdd = true;
 
-                    } else {
-                        return;
-                    }
-                    getActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-//                            fragment.initListener();
-                            fragment.showView(getData());
+                    if (readType == 0) {//单次
+
+                        if (hmList.size() >= 0 && hmList.size() < 1) {//只允许插入一个数
+                            Log.i(TAG, "j size: " + hmList.size());
+                            hmList.put(model._EPC + model._TID, model);
+                            isAdd = true;
+
+                        } else {
+
+                            return;
                         }
-                    });
 
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+//                            fragment.initListener();
+                                fragment.showView(getData());
+                            }
+                        });
+                    } else {
+                        hmList.put(model._EPC + model._TID, model);
+                    }
 //                    } else {
 //                        Log.i(TAG, TAG + " OutPutEPC: " + model._EPC + model._TID);
 //                        //TODO 批量读取
