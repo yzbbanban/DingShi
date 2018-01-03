@@ -263,7 +263,7 @@ public class BaseFragment extends Fragment {
     protected HashMap<String, String> bs = new HashMap<>();
     int i=0;
     protected void DeCode(final NewRfidFragment fragment) {
-        ToastUtil.showShortToast("deCode: "+i);
+//        ToastUtil.showShortToast("deCode: "+i);
         if (i==0){
             bs.clear();
             i++;

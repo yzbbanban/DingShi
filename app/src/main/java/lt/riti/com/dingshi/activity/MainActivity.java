@@ -49,16 +49,16 @@ public class MainActivity extends BaseActivity {
     public void onCreateCustomToolBar(Toolbar toolbar) {
         super.onCreateCustomToolBar(toolbar);
         tv_center.setText("");
-        tv_right.setText("PDA扫描");
+        tv_right.setText("RFID扫描");
         tv_right.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (isRCode) {//是扫码
-                    tv_right.setText("扫码");
+                    tv_right.setText("二维码扫描");
                     inputType = 1;
                     isRCode = false;
                 } else {//PDA扫描
-                    tv_right.setText("PDA扫描");
+                    tv_right.setText("RFID扫描");
                     inputType = 0;
                     isRCode = true;
                 }

@@ -14,21 +14,23 @@
 <body>
 
 <div class="index_top">
-    <div class="layui-row" style="background:url(images/index_top1.jpg) no-repeat center top;background-size: 100%;">
+    <div class="layui-row"
+         style="background:url(images/index_top1.jpg) no-repeat center top;background-size: 100%;">
         <div class="layui-col-xs12">
             <h1 class="layui-title3">
                 <a href="javascript:;" class="code_fh"><i class="layui-icon">&#xe603;</i></a>
                 <input type="text" name="bl" id="selects" style="width:60%" placeholder="请输入物流箱编号"
                        class="layui-input jhr">
-                <!--<button type="button" class="layui-btn" id="btn_search" style="width:20%">添加-->
-                <!--</button>-->
+                <button type="button" class="layui-btn" id="btn_add" style="width:20%">添加
+                </button>
             </h1>
             <p class="mt20"><label>订单编号</label></p>
             <p><span id="order" class="fs30">A000012</span></p>
             <p class="mb20"><label>出货人：</label><span id="chr">张三</span></p>
         </div>
     </div>
-    <div class="layui-row" style="background:url(images/index_top2.jpg) no-repeat center top;background-size: 100%;">
+    <div class="layui-row"
+         style="background:url(images/index_top2.jpg) no-repeat center top;background-size: 100%;">
         <div class="layui-col-xs12">
             <p class="textl"><label>地址：</label><span id="address">月台1</span></p>
         </div>
@@ -46,113 +48,78 @@
         <button class="layui-btn layui-btn-big1 add">提交</button>
     </div>
     <ul class="code_list" id="ull">
-        <!-- 	<li>1111111111</li>
-<li>1111111111</li>
-<li>1111111111</li> -->
+       
     </ul>
     <span class="layui-word-aux">*提交之前，请手动吧锁关上</span>
 </div>
 
 <script src="js/jquery-1.10.2.js"></script>
 <script src="js/ip.js"></script>
-<script src="js/layer/layer.min.js"></script>
 <script type="text/javascript">
-            //这个别动
-            function sendInfoToJavaWithType(){
-                //改为批量读取
-                window.AndroidWebView.changeRead("1");
-  	        }
-
-            //这个别动
-			function showInfoFromJava(msg) {
-			    //alert("111："+msg);//msg 为 json 字符
-				if(msg == "[]") {
-					$("#selects").val("");
+			//这个别动1111111111111111111111111
+			function sendInfoToJavaWithType() {
+				//改为批量读取
+				window.AndroidWebView.changeRead("1");
+			}
+			var message = "";
+			//获取数据
+			function sendInfoFromJava(msg) {
+			    //alert(msg);
+			    if(msg == "[]") {
+					//$("#selects").val("");
+					return;
 				} else {
-					//alert("22来自客户端的信息："+msg);
-					var aoJs = JSON.parse(msg); //转换为object对象
-					var coded=aoJs[0].bucket_code;
-					if(coded.length>=24){
-					    $("#selects").val(aoJs[0].bucket_code);
-					}
+					message = msg;
 				}
-			}
-
-
-			$(".code_list").each(function() {
-				$(this).click(function() {
-					//直接删除
-					if(confirm("确认删除吗")) {
-						$.ajax({
-							type: "post",
-							url: ip + "index.php?action=del",
-							data: {
-								"order": order,
-								"cage": cage,
-								"id": uid,
-								"html":$(this).html()
-							},
-							success: function(json) {
-								var obj = eval("(" + json + ")");
-								if(obj['status']) {
-									layer.msg("删除成功", {
-										time: 1000
-									});
-									//删除当前元素
-									$(this).remove();
-								} else {
-									layer.msg(obj['str'], {
-										time: 1000
-									});
-								}
+					//alert("xxxxxxx"+message);
+					var aoJs = JSON.parse(message); //转换为object对象
+					var num = $("#num").html();
+					$(".code_list").html("");
+					for(var i = 0; i < aoJs.length; i++) {
+						var val = aoJs[i].bucket_code;
+						//alert("编号： "+val);
+						if(val != "" && val.length>=1) {
+							var str = fun(val);
+							if(str) {
+								$('.jhr').val('');
+								alert("编号已存在");
 							}
-						})
-
-					}
-				})
-			})
-
-			function sendInfoFromJava(m) {
-				if(m == '1') {
-					//alert("来自客户端的信息：" + m);
-					var val = $("#selects").val();
-					if(val != "") {
-						//alert("来自客户端的信息22：" + val);
-						var str = fun(val);
-						if(str) {
-							$('.jhr').val('');
-							//layer.msg('编号已存在',{time:1000});
-							alert("编号已存在");
+                            var s  = '<li>' + '<span>'+val+'</span>'+'<button  style="float:right"  class="layui-btn layui-btn-danger delete">删除</button>'+'</li>';
+						    $(".code_list").append(s);
 						}
-						$.ajax({
-							type: "post",
-							url: ip + "index.php?action=selcode",
-							data: {
-								"code": val,
-								"id": id,
-								"uid": uid
-							},
-							success: function(json) {
-								//alert("自动上传： " + json)
-								var obj = eval("(" + json + ")");
-								if(obj['status']) {
-									var num = $("#num").html();
-									$("#num").html(parseInt(num) + 1);
-									var str = "<li>" + val + "</li>";
-									$(".code_list").append(str);
-									$('.jhr').val('');
-
-								} else {
-									layer.msg(obj['str'], {
-										time: 1000
-									});
-								}
-							}
-						});
 					}
-				}
+					$("#num").html($(".code_list li").length);
+					del_fun();
 			}
 
+			function del_fun() {
+
+				$(".delete").unbind("click");
+				//删除
+				$(".delete").click(function() {
+
+					if(confirm("你确认要删除吗？？")) {
+						var num = $("#num").html();
+						$(this).parent('li').remove();
+						$("#num").html(parseInt(num) - 1);
+
+
+					}
+
+				})
+
+			}
+
+			function getJsonData() {
+				var js = "["
+				$(".code_list li").each(function() {
+					js += '{"code":' + '"' + $('span',this).text() + '"' + '},';
+				})
+				js = js.substring(0, js.lastIndexOf(","));
+				js += "]";
+				//alert(js);
+				return js;
+			}
 
 
 
@@ -184,47 +151,39 @@
 						$("#chr").html(obj['drver_name']);
 						$("#address").html(obj['address']);
 						//不能删 批次单次读取识别
-                        sendInfoToJavaWithType();
+						sendInfoToJavaWithType();
 					}
 				});
-                /**
-				$('#btn_search').click(function() {
-					var val = $("#selects").val();
-					if(val) {
-						var str = fun(val);
-						if(str) {
-							$('.jhr').val('');
-							layer.msg('编号已存在', {
-								time: 1000
-							});
-							// alert("编号已存在");
-						}
-						$.ajax({
-							type: "post",
-							url: ip + "index.php?action=selcode",
-							data: {
-								"code": val,
-								"id": id,
-								"uid": uid
-							},
-							success: function(json) {
-								var obj = eval("(" + json + ")");
-								if(obj['status']) {
-									var num = $("#num").html();
-									$("#num").html(parseInt(num) + 1);
-									var str = "<li>" + val + "</li>";
-									$(".code_list").append(str);
-									$('.jhr').val('');
-								} else {
-									layer.msg(obj['str'], {
-										time: 1000
-									});
-								}
+
+				$(".code_list button").each(function() {
+                    $(this).click(function() {
+                        //直接删除
+                        if(confirm("确认删除吗")) {
+                            $(this).parent().remove();
+                        }
+                    })
+			    })
+
+				$('#btn_add').click(function() {
+					var val = $('.jhr').val();
+						if(val) {
+							var str = fun(val);
+							if(str) {
+								$('.jhr').val('');
+								layer.msg('编号已存在', {
+									time: 1000
+								});
+								// alert("编号已存在");
 							}
-						});
-					}
-				});
-				*/
+						var num = $("#num").html();
+						$("#num").html(parseInt(num) + 1);
+						var str  = '<li>' + '<span>'+val+'</span>'+'<button  style="float:right"  class="layui-btn layui-btn-danger delete">删除</button>'+'</li>';
+						$(".code_list").append(str);
+						$('.jhr').val('');
+						del_fun();
+                	}	
+				})
+
 				$('.jhr').keyup(function(e) {
 					if(e.keyCode == 13) {
 						var val = $(this).val();
@@ -237,53 +196,54 @@
 								});
 								// alert("编号已存在");
 							}
-							$.ajax({
-								type: "post",
-								url: ip + "index.php?action=selcode",
-								data: {
-									"code": val,
-									"id": id,
-									"uid": uid
-								},
-								success: function(json) {
-									var obj = eval("(" + json + ")");
-									if(obj['status']) {
-										var num = $("#num").html();
-										$("#num").html(parseInt(num) + 1);
-										var str = "<li>" + val + "</li>";
-										$(".code_list").append(str);
-										$('.jhr').val('');
-									} else {
-										layer.msg(obj['str'], {
-											time: 1000
-										});
-									}
-								}
-							});
+							var num = $("#num").html();
+							$("#num").html(parseInt(num) + 1);
+							var str  = '<li>' + '<span>'+val+'</span>'+'<button  style="float:right"  class="layui-btn layui-btn-danger delete">删除</button>'+'</li>';
+							$(".code_list").append(str);
+							$('.jhr').val('');
+							del_fun();
+							
 						}
 					}
 				})
+
+                function del_fun(){
+
+                    $(".delete").unbind("click");
+                    //删除
+                    $(".delete").click(function(){
+
+                        if(confirm("你确认要删除吗？？")){
+                            var num = $("#num").html();
+                            $(this).parent('li').remove();
+                            $("#num").html(parseInt(num) - 1);
+                            // $(this).remove();
+                        }
+
+                    })
+                }
+
 				//点击提交
 				$(".add").click(function() {
-				    //alert("测试：add");
+					del_fun();
+					//alert("测试：add");
+					var jsData = getJsonData();
+					var d={"code":jsData,"id":id,"uid":uid};
 					$(".add").attr("disabled", true);
 					$.ajax({
 						type: "post",
 						url: ip + "index.php?action=add",
-						data: {
-							"id": id,
-							"uid": uid
-						},
+						data: d,
 						success: function(json) {
 							var obj = eval("(" + json + ")");
-							//alert("测试：s"+json);
 							if(obj['status']) {
-								//layer.msg("提交成功", {
-								//	time: 1000
-								//});
-								alert("提交成功");
-								$(".add").attr("disabled", false);
-								window.location.href = "main.html?uid=" + uid;
+								setTimeout(function(){
+									if(confirm("提交成功")){
+									    window.location.href = "main.html?uid=" + uid;
+									}else{
+									    window.location.href = "main.html?uid=" + uid;
+									}
+								},1000);
 							} else {
 								layer.msg(obj['str'], {
 									time: 1000
@@ -296,7 +256,6 @@
 
 				//返回
 				$(".code_fh").click(function() {
-					// alert(id);
 					$.ajax({
 						type: "post",
 						url: ip + "index.php?action=back",
@@ -312,7 +271,10 @@
 					})
 				})
 			})
-		</script>
+
+
+</script>
+<script src="js/layer/layer.min.js"></script>
 
 </body>
 

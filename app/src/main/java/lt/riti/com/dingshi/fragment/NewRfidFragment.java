@@ -43,7 +43,8 @@ public class NewRfidFragment extends BaseFragment implements IAsynchronousMessag
     private WebView mWebView;
     private String loginStatus;
     private int inputType;//rfid或二维码
-
+    private static AlertDialog alertDialog;
+    private static AlertDialog.Builder builder;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -97,6 +98,7 @@ public class NewRfidFragment extends BaseFragment implements IAsynchronousMessag
                 return true;
             }
         });
+        builder = new AlertDialog.Builder(getActivity());
     }
 
 
@@ -131,6 +133,7 @@ public class NewRfidFragment extends BaseFragment implements IAsynchronousMessag
                     if (readType == 0) {
                         DeCode(this);
                     } else {//批量
+//                        Log.i(TAG, "onKeyDown: 批量");
                         PingPong_Read();
                     }
 
@@ -180,7 +183,6 @@ public class NewRfidFragment extends BaseFragment implements IAsynchronousMessag
 
     // 间歇性读
     private void PingPong_Read() {
-
         if (isStartPingPong)
             return;
         isStartPingPong = true;
@@ -219,11 +221,29 @@ public class NewRfidFragment extends BaseFragment implements IAsynchronousMessag
             switch (msg.what) {
                 case 0:
                     if (inputType == 1) {
-                        Log.i(TAG, "handleMessage: "+inputType);
+                        Log.i(TAG, "handleMessage: " + inputType);
                         DeCode(NewRfidFragment.this);
                         showView(getRCodeData());
                     } else {
                         openRfid();
+                    }
+                    break;
+                case 1:
+                    builder.setTitle("提示")
+                            .setMessage((String) msg.obj)
+                            .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    dialog.dismiss();
+
+                                }
+                            })
+                            .setNegativeButton("取消", null);
+                    alertDialog = builder.create();
+                    if (alertDialog.isShowing()) {
+                        alertDialog.dismiss();
+                    } else {
+                        alertDialog.show();
                     }
                     break;
             }
@@ -246,14 +266,16 @@ public class NewRfidFragment extends BaseFragment implements IAsynchronousMessag
      * @param buckets
      */
     public void showView(List<Bucket> buckets) {
-//        bs.clear();
-//        hmList.clear();
-        Toast.makeText(getActivity(), "showView--: " + buckets, Toast.LENGTH_SHORT).show();
-        Log.i(TAG, "showView: " + buckets.toString());
+
+//        ToastUtil.showShortToast(""+buckets);
+//        Log.i(TAG, "showView: " + buckets.toString());
         Gson gson = new Gson();
         String msg = gson.toJson(buckets);
+//        Log.i(TAG, "buckets--->: " + msg);
         //调用js中的函数：showInfoFromJava(msg)
-        mWebView.loadUrl("javascript:showInfoFromJava('" + msg + "')");
+        mWebView.loadUrl("javascript:sendInfoFromJava('" + msg + "')");
+//        mWebView.loadUrl("javascript:sendInfoFromJava('1')");
+
     }
 
     /**
@@ -302,8 +324,8 @@ public class NewRfidFragment extends BaseFragment implements IAsynchronousMessag
     @Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {
 //        Toast.makeText(getActivity(), "sssssss", Toast.LENGTH_SHORT).show();
-
-//        mWebView.loadUrl("javascript:sendInfoFromJava('1')");
+        bs.clear();
+        hmList.clear();
         if (readType == 1) {
             Pingpong_Stop();
         }
@@ -344,7 +366,6 @@ public class NewRfidFragment extends BaseFragment implements IAsynchronousMessag
          */
         @Override
         public void onProgressChanged(WebView view, int newProgress) {
-
             super.onProgressChanged(view, newProgress);
         }
 
@@ -356,27 +377,39 @@ public class NewRfidFragment extends BaseFragment implements IAsynchronousMessag
         @Override
         public boolean onJsAlert(WebView view, String url, final String message, JsResult result) {
             Log.d("main", "onJsAlert:" + message);
-            getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
+            Message msg = new Message();
+            msg.obj = message;
+            msg.what = 1;
+            handler.sendMessage(msg);
 
-                    new AlertDialog.Builder(getActivity())
-                            .setTitle("提示")
-                            .setMessage(message)
-                            .setPositiveButton("确定", new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    dialog.dismiss();
-
-                                }
-                            })
-                            .setNegativeButton("取消", null)
-                            .show();
-
-                }
-            });
             result.confirm();//这里必须调用，否则页面会阻塞造成假死
             return true;
         }
+
+        //设置响应js 的Confirm()函数
+        @Override
+        public boolean onJsConfirm(WebView view, String url, String message, final JsResult result) {
+            AlertDialog.Builder b = new AlertDialog.Builder(NewRfidFragment.this.getActivity());
+            b.setTitle("提示");
+            b.setMessage(message);
+            b.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    result.confirm();
+                }
+            });
+            b.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    result.cancel();
+                }
+            });
+            b.create().show();
+            result.confirm();//这里必须调用，
+            return true;
+        }
+
     }
+
+
 }
